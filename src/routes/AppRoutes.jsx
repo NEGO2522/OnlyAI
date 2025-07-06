@@ -1,14 +1,20 @@
 import { Routes, Route } from "react-router-dom";
+import { lazy, Suspense } from 'react';
 
-// Page‑level views
-import Home from "../pages/Home";
-import LanguagePage from "../pages/LanguagePage";
-import NotFound from "../pages/NotFound";
-import About from "../pages/About";
-import Tutorials from "../pages/Tutorials";
+// Lazy load page components
+const Home = lazy(() => import("../pages/Home"));
+const LanguagePage = lazy(() => import("../pages/LanguagePage"));
+const NotFound = lazy(() => import("../pages/NotFound"));
+const About = lazy(() => import("../pages/About"));
+const Tutorials = lazy(() => import("../pages/Tutorials"));
+const ProgramDetail = lazy(() => import("../language/ProgramDetail"));
 
-// Component rendered for individual program details (nested route)
-import ProgramDetail from "../language/ProgramDetail";
+// Loading component
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+  </div>
+);
 
 // Fallback component when no program has been selected yet
 function SelectPrompt() {
@@ -24,26 +30,28 @@ function SelectPrompt() {
  */
 export default function AppRoutes() {
   return (
-    <Routes>
-      {/* Home / Landing */}
-      <Route path="/" element={<Home />} />
-      
-      {/* About Page */}
-      <Route path="/about" element={<About />} />
-      
-      {/* Tutorials Page */}
-      <Route path="/tutorials" element={<Tutorials />} />
+    <Suspense fallback={<LoadingFallback />}>
+      <Routes>
+        {/* Home / Landing */}
+        <Route path="/" element={<Home />} />
+        
+        {/* About Page */}
+        <Route path="/about" element={<About />} />
+        
+        {/* Tutorials Page */}
+        <Route path="/tutorials" element={<Tutorials />} />
 
-      {/* Dynamic language section */}
-      <Route path=":language" element={<LanguagePage />}>
-        {/* When only /:language, show a friendly prompt */}
-        <Route index element={<SelectPrompt />} />
-        {/* /:language/:programSlug shows the program details */}
-        <Route path=":programSlug" element={<ProgramDetail />} />
-      </Route>
+        {/* Dynamic language section */}
+        <Route path=":language" element={<LanguagePage />}>
+          {/* When only /:language, show a friendly prompt */}
+          <Route index element={<SelectPrompt />} />
+          {/* /:language/:programSlug shows the program details */}
+          <Route path=":programSlug" element={<ProgramDetail />} />
+        </Route>
 
-      {/* Catch‑all 404 */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        {/* Catch‑all 404 */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Suspense>
   );
 }
